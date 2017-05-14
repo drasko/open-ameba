@@ -23,6 +23,15 @@ OBJ_DIR ?= $(TARGET)/obj
 BIN_DIR ?= $(TARGET)/bin
 ELFFILE ?= $(OBJ_DIR)/$(TARGET).axf
 
+# For verbose make
+ifeq ("$(V)","1")
+Q :=
+vecho := @true
+else
+Q := @
+vecho := @echo
+endif
+
 all: prerequirement application
 mp: prerequirement application
 
@@ -41,7 +50,7 @@ build_info:
 		echo \#define RTL8195AFW_COMPILE_DOMAIN ; \
 	fi >> .ver
 	@echo \#define RTL195AFW_COMPILER \"gcc `$(CC) $(CFLAGS) -dumpversion | tr --delete '\r'`\" >> .ver
-	@mv -f .ver project/inc/$@.h
+	$(Q) mv -f .ver project/inc/$@.h
 
 .PHONY:	application 
 application: build_info $(SRC_O) $(DRAM_O) $(BOOT_O)
@@ -49,9 +58,9 @@ application: build_info $(SRC_O) $(DRAM_O) $(BOOT_O)
 	@echo "Link ($(TARGET))"
 #	@echo "==========================================================="
 	@mkdir -p $(BIN_DIR) $(OBJ_DIR)
-	@$(file > $(OBJ_DIR)/obj_list.lst,$(OBJ_LIST))
-	@$(LD) $(LFLAGS) -o $(ELFFILE) @$(OBJ_DIR)/obj_list.lst $(LIBFLAGS) -T$(LDFILE)
-	@$(OBJDUMP) -d $(ELFFILE) > $(OBJ_DIR)/$(TARGET).asm
+	$(Q) $(file > $(OBJ_DIR)/obj_list.lst,$(OBJ_LIST))
+	$(Q) $(LD) $(LFLAGS) -o $(ELFFILE) @$(OBJ_DIR)/obj_list.lst $(LIBFLAGS) -T$(LDFILE)
+	$(Q) $(OBJDUMP) -d $(ELFFILE) > $(OBJ_DIR)/$(TARGET).asm
 
 .PHONY:	prerequirement
 #.NOTPARALLEL: prerequirement
@@ -65,22 +74,22 @@ prerequirement:
 $(SRC_O): %.o : %.c
 	@echo $<
 	@mkdir -p $(OBJ_DIR)/$(dir $@)
-	@$(CC) $(CFLAGS) $(INCFLAGS) -c $< -o $(OBJ_DIR)/$@
-	@$(CC) -MM $(CFLAGS) $(INCFLAGS) $< -MT $@ -MF $(OBJ_DIR)/$(patsubst %.o,%.d,$@)
+	$(Q) $(CC) $(CFLAGS) $(INCFLAGS) -c $< -o $(OBJ_DIR)/$@
+	$(Q) $(CC) -MM $(CFLAGS) $(INCFLAGS) $< -MT $@ -MF $(OBJ_DIR)/$(patsubst %.o,%.d,$@)
 
 $(DRAM_O): %.o : %.c
 	@echo $<
 	@mkdir -p $(OBJ_DIR)/$(dir $@)
-	@$(CC) $(CFLAGS) $(INCFLAGS) -c $< -o $(OBJ_DIR)/$@
-	@$(OBJCOPY) --prefix-alloc-sections .sdram $(OBJ_DIR)/$@
-	@$(CC) -MM $(CFLAGS) $(INCFLAGS) $< -MT $@ -MF $(OBJ_DIR)/$(patsubst %.o,%.d,$@)
+	$(Q) $(CC) $(CFLAGS) $(INCFLAGS) -c $< -o $(OBJ_DIR)/$@
+	$(Q) $(OBJCOPY) --prefix-alloc-sections .sdram $(OBJ_DIR)/$@
+	$(Q) $(CC) -MM $(CFLAGS) $(INCFLAGS) $< -MT $@ -MF $(OBJ_DIR)/$(patsubst %.o,%.d,$@)
 
 $(BOOT_O): %.o : %.c
 	@echo $<
 	@mkdir -p $(OBJ_DIR)/$(dir $@)
-	@$(CC) $(CFLAGS) $(INCFLAGS) -c $< -o $(OBJ_DIR)/$@
-	@$(OBJCOPY) --prefix-alloc-sections .boot $(OBJ_DIR)/$@
-	@$(CC) -MM $(CFLAGS) $(INCFLAGS) $< -MT $@ -MF $(OBJ_DIR)/$(patsubst %.o,%.d,$@)
+	$(Q) $(CC) $(CFLAGS) $(INCFLAGS) -c $< -o $(OBJ_DIR)/$@
+	$(Q) $(OBJCOPY) --prefix-alloc-sections .boot $(OBJ_DIR)/$@
+	$(Q) $(CC) -MM $(CFLAGS) $(INCFLAGS) $< -MT $@ -MF $(OBJ_DIR)/$(patsubst %.o,%.d,$@)
 	
 -include $(DEPENDENCY_LIST)
 
