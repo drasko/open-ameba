@@ -26,29 +26,4 @@ CFLAGS += -DLOGUART_STACK_SIZE=1024
 #=============================================
 #user main
 ADD_SRC_C += project/src/user/main.c
-# components
-ADD_SRC_C += project/src/user/wifi_console.c
-ADD_SRC_C += project/src/user/atcmd_user.c
-ADD_SRC_C += project/src/user/spiram_fifo.c
-
-#lib mad
-ADD_SRC_C += project/src/mad/mad_version.c
-ADD_SRC_C += project/src/mad/mpg12/layer12.c
-ADD_SRC_C += project/src/mad/frame.c
-ADD_SRC_C += project/src/mad/layer3.c
-ADD_SRC_C += project/src/mad/align.c
-ADD_SRC_C += project/src/mad/decoder.c
-ADD_SRC_C += project/src/mad/huffman.c
-ADD_SRC_C += project/src/mad/fixed.c
-ADD_SRC_C += project/src/mad/bit.c
-ADD_SRC_C += project/src/mad/synth.c
-ADD_SRC_C += project/src/mad/timer.c
-ADD_SRC_C += project/src/mad/stream.c
-
-#driver
-ADD_SRC_C += project/src/driver/i2s_freertos.c
-
-#include
-INCLUDES += project/inc/mad
-
 

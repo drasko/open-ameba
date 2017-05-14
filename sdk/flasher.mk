@@ -4,7 +4,8 @@ include userset.mk
 include $(SDK_PATH)paths.mk
 #---------------------------
 #FLASHER = stlink-v2-1
-FLASHER = stlink-v2
+#FLASHER = stlink-v2
+FLASHER = cmsis-dap
 #FLASHER ?= Jlink
 #JLINK_PATH ?= D:/MCU/SEGGER/JLink_V612i/
 #---------------------------
@@ -60,8 +61,13 @@ ifeq ($(FLASHER),stlink-v2)
 # stlink-v2 FLASHER_SPEED ..1800 kHz
 FLASHER_SPEED = 1800
 else
+ifeq ($(FLASHER),cmsis-dap)
+# stlink-v2 FLASHER_SPEED ..1800 kHz
+FLASHER_SPEED = 1800
+else
 # over FLASHER_SPEED ..500 kHz ?
 FLASHER_SPEED = 500
+endif
 endif
 endif
 
