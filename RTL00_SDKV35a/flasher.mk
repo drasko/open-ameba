@@ -4,9 +4,9 @@ include userset.mk
 include $(SDK_PATH)paths.mk
 #---------------------------
 #FLASHER = stlink-v2-1
-#FLASHER = stlink-v2
-FLASHER ?= Jlink
-JLINK_PATH ?= D:/MCU/SEGGER/JLink_V612i/
+FLASHER = stlink-v2
+#FLASHER ?= Jlink
+#JLINK_PATH ?= D:/MCU/SEGGER/JLink_V612i/
 #---------------------------
 # Default
 #---------------------------
@@ -42,6 +42,15 @@ OPENOCD = $(OPENOCD_PATH)openocd
 
 JLINK_GDB ?= JLinkGDBServer.exe
 JLINK_EXE ?= JLink.exe
+
+# For verbose make
+ifeq ("$(V)","1")
+Q :=
+vecho := @true
+else
+Q := @
+vecho := @echo
+endif
 
 ifeq ($(FLASHER), Jlink)
 # Jlink FLASHER_SPEED ..4000 kHz
@@ -262,8 +271,8 @@ ifdef COMPILED_BOOT_BIN
 	$(OBJCOPY) --change-section-address .boot.head=0x10000ba8 -j .boot.head -j .bootloader -Obinary $(ELFFILE) $(RAM1P_IMAGE)
 else
 #	$(OBJCOPY) -j .rom_ram -Obinary $(ELFFILE) $(RAM_IMAGE)
-	$(OBJCOPY) -j .ram.start.table -j .ram_image1.text -Obinary $(ELFFILE) $(RAM1R_IMAGE)
-	$(PICK) 0x$(RAM1_START_ADDR) 0x$(RAM1_END_ADDR) $(RAM1R_IMAGE) $(RAM1P_IMAGE) head+reset_offset 0x0B000
+	$(Q) $(OBJCOPY) -j .ram.start.table -j .ram_image1.text -Obinary $(ELFFILE) $(RAM1R_IMAGE)
+	$(Q) $(PICK) 0x$(RAM1_START_ADDR) 0x$(RAM1_END_ADDR) $(RAM1R_IMAGE) $(RAM1P_IMAGE) head+reset_offset 0x0B000
 endif
 else 
 	$(error "BOOT-image size = 0")
@@ -290,14 +299,14 @@ $(RAM2NS_IMAGE):$(ELFFILE) $(NMAPFILE)
 	@echo "==========================================================="
 	@echo "Create image2ns ($(RAM2NS_IMAGE))"
 #	@echo "==========================================================="
-	mkdir -p $(BIN_DIR)
-	rm -f $(RAM2_IMAGE) $(RAM2NS_IMAGE)
-	$(eval RAM2_START_ADDR = $(shell grep __ram_image2_text $(NMAPFILE) | grep _start__ | awk '{print $$1}'))
-	$(eval RAM2_END_ADDR = $(shell grep __ram_image2_text $(NMAPFILE) | grep _end__ | awk '{print $$1}'))
+	$(Q) mkdir -p $(BIN_DIR)
+	$(Q) rm -f $(RAM2_IMAGE) $(RAM2NS_IMAGE)
+	$(Q) $(eval RAM2_START_ADDR = $(shell grep __ram_image2_text $(NMAPFILE) | grep _start__ | awk '{print $$1}'))
+	$(Q) $(eval RAM2_END_ADDR = $(shell grep __ram_image2_text $(NMAPFILE) | grep _end__ | awk '{print $$1}'))
 	$(if $(RAM2_START_ADDR),,$(error "Not found __ram_image2_text_start__!"))
 	$(if $(RAM2_END_ADDR),,$(error "Not found __ram_image2_text_end__!"))
-	$(OBJCOPY) -j .image2.start.table -j .ram_image2.text -j .ram_image2.rodata -j .ram.data -Obinary $(ELFFILE) $(RAM2_IMAGE)
-	$(PICK) 0x$(RAM2_START_ADDR) 0x$(RAM2_END_ADDR) $(RAM2_IMAGE) $(RAM2NS_IMAGE) body+reset_offset
+	$(Q) $(OBJCOPY) -j .image2.start.table -j .ram_image2.text -j .ram_image2.rodata -j .ram.data -Obinary $(ELFFILE) $(RAM2_IMAGE)
+	$(Q) $(PICK) 0x$(RAM2_START_ADDR) 0x$(RAM2_END_ADDR) $(RAM2_IMAGE) $(RAM2NS_IMAGE) body+reset_offset
 
 $(RAM3_IMAGE): $(ELFFILE) $(NMAPFILE) 
 	@echo "==========================================================="
@@ -311,8 +320,8 @@ $(RAM3_IMAGE): $(ELFFILE) $(NMAPFILE)
 	$(if $(RAM3_END_ADDR),,$(error "Not found __sdram_data_end__!"))
 #ifneq ($(RAM3_START_ADDR),$(RAM3_END_ADDR))
 	@echo	$(RAM3_START_ADDR) $(RAM3_END_ADDR)
-	@$(OBJCOPY) -j .image3 -j .sdr_text -j .sdr_rodata -j .sdr_data -Obinary $(ELFFILE) $(RAM3_IMAGE)
-	$(PICK) 0x$(RAM3_START_ADDR) 0x$(RAM3_END_ADDR) $(RAM3_IMAGE) $(RAM3P_IMAGE) body+reset_offset
+	$(Q) $(OBJCOPY) -j .image3 -j .sdr_text -j .sdr_rodata -j .sdr_data -Obinary $(ELFFILE) $(RAM3_IMAGE)
+	$(Q) $(PICK) 0x$(RAM3_START_ADDR) 0x$(RAM3_END_ADDR) $(RAM3_IMAGE) $(RAM3P_IMAGE) body+reset_offset
 #else
 #	@rm -f $(RAM3_IMAGE) $(RAM3P_IMAGE)
 #	@echo "SDRAM not used (size = 0)"
